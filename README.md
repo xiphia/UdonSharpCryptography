@@ -1,6 +1,6 @@
 # UdonSharpCryptography
 
-A small cyptographyc package for UdonSharp.
+A small cyptographic package for UdonSharp.
 
 ## APIs
 
