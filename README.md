@@ -2,6 +2,11 @@
 
 A small cryptographic package for UdonSharp.
 
+## Requirements
+
+* VCC based project
+* UdonSharp 1.1.0 or later
+
 ## APIs
 
 ### Hash algorithms
