@@ -1,8 +1,6 @@
-﻿using UdonSharp;
-
-namespace XiPHiA.Cryptography
+﻿namespace XiPHiA.Scripts.Cryptography
 {
-    public class HMACSHA512 : UdonSharpBehaviour
+    public static class HMACSHA512
     {
         public static byte[] ComputeHash(byte[] message, byte[] secret)
         {
@@ -15,7 +13,7 @@ namespace XiPHiA.Cryptography
             {
                 secret.CopyTo(key, 0);
             }
-            return SHA512.ComputeHash(HashOps.Concat(HashOps.Xor(key, 0x5C), SHA512.ComputeHash(HashOps.Concat(HashOps.Xor(key, 0x36), message))));
+            return SHA512.ComputeHash(key.Xor(0x5C).Concat(SHA512.ComputeHash(key.Xor(0x36).Concat(message))));
         }
     }
 }

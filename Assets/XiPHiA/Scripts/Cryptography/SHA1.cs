@@ -1,19 +1,19 @@
 ﻿using System;
-using UdonSharp;
+using XiPHiA.Scripts.Utility;
 
-namespace XiPHiA.Cryptography
+namespace XiPHiA.Scripts.Cryptography
 {
-    public class SHA1 : UdonSharpBehaviour
+    public static class SHA1
     {
         private static void PrepareWords(byte[] chunk, uint[] words)
         {
             for (var i = 0; i < 16; i++)
             {
-                words[i] = HashOps.GetWordFromBytes(chunk, i * 4);
+                words[i] = chunk.GetUInt(i * 4);
             }
             for (var i = 16; i < 80; i++)
             {
-                words[i] = HashOps.LeftRotate32(words[i - 3] ^ words[i - 8] ^ words[i - 14] ^ words[i - 16], 1);
+                words[i] = (words[i - 3] ^ words[i - 8] ^ words[i - 14] ^ words[i - 16]).LeftRotate(1);
             }
         }
 
@@ -32,9 +32,7 @@ namespace XiPHiA.Cryptography
             var paddedMessage = new byte[paddedLength];
             message.CopyTo(paddedMessage, 0);
             paddedMessage[messageLength] = 0x80;
-            var reverseLength = HashOps.IntToBytes(messageLength * 8);
-            Array.Reverse(reverseLength);
-            reverseLength.CopyTo(paddedMessage, paddedLength - 4);
+            (messageLength * 8).ToByteArray(true).CopyTo(paddedMessage, paddedLength - 4);
             return paddedMessage;
         }
 
@@ -52,10 +50,10 @@ namespace XiPHiA.Cryptography
                 0x8F1BBCDC,
                 0xCA62C1D6
             };
-            var temp = HashOps.LeftRotate32(chunkHash[0], 5) + f + chunkHash[4] + k[round / 20] + words[round];
+            var temp = chunkHash[0].LeftRotate(5) + f + chunkHash[4] + k[round / 20] + words[round];
             chunkHash[4] = chunkHash[3];
             chunkHash[3] = chunkHash[2];
-            chunkHash[2] = HashOps.LeftRotate32(chunkHash[1], 30);
+            chunkHash[2] = chunkHash[1].LeftRotate(30);
             chunkHash[1] = chunkHash[0];
             chunkHash[0] = temp;
         }
@@ -65,9 +63,7 @@ namespace XiPHiA.Cryptography
             var result = new byte[20];
             for (var i = 0; i < 5; i++)
             {
-                var wordBytes = HashOps.UIntToBytes(hash[i]);
-                Array.Reverse(wordBytes);
-                wordBytes.CopyTo(result, 4 * i);
+                hash[i].ToByteArray(true).CopyTo(result, 4 * i);
             }
             return result;
         }

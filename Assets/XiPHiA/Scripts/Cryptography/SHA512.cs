@@ -1,20 +1,20 @@
 ﻿using System;
-using UdonSharp;
+using XiPHiA.Scripts.Utility;
 
-namespace XiPHiA.Cryptography
+namespace XiPHiA.Scripts.Cryptography
 {
-    public class SHA512 : UdonSharpBehaviour
+    public static class SHA512
     {
         private static void PrepareWords(byte[] chunk, ulong[] words)
         {
             for (var i = 0; i < 16; i++)
             {
-                words[i] = HashOps.GetDoubleWordFromBytes(chunk, i * 8);
+                words[i] = chunk.GetULong(i * 8);
             }
             for (var i = 16; i < 80; i++)
             {
-                var s0 = HashOps.RightRotate64(words[i - 15], 1) ^ HashOps.RightRotate64(words[i - 15], 8) ^ words[i - 15] >> 7;
-                var s1 = HashOps.RightRotate64(words[i - 2], 19) ^ HashOps.RightRotate64(words[i - 2], 61) ^ words[i - 2] >> 6;
+                var s0 = words[i - 15].RightRotate(1) ^ words[i - 15].RightRotate(8) ^ words[i - 15] >> 7;
+                var s1 = words[i - 2].RightRotate(19) ^ words[i - 2].RightRotate(61) ^ words[i - 2] >> 6;
                 words[i] = words[i - 16] + s0 + words[i - 7] + s1;
             }
         }
@@ -34,9 +34,7 @@ namespace XiPHiA.Cryptography
             var paddedMessage = new byte[paddedLength];
             message.CopyTo(paddedMessage, 0);
             paddedMessage[messageLength] = 0x80;
-            var reverseLength = HashOps.LongToBytes(messageLength * 8);
-            Array.Reverse(reverseLength);
-            reverseLength.CopyTo(paddedMessage, paddedLength - 8);
+            ((long)messageLength * 8).ToByteArray(true).CopyTo(paddedMessage, paddedLength - 8);
             return paddedMessage;
         }
 
@@ -125,8 +123,8 @@ namespace XiPHiA.Cryptography
                 0x5FCB6FAB3AD6FAEC,
                 0x6C44198C4A475817
             };
-            var s0 = HashOps.RightRotate64(chunkHash[0], 28) ^ HashOps.RightRotate64(chunkHash[0], 34) ^ HashOps.RightRotate64(chunkHash[0], 39);
-            var s1 = HashOps.RightRotate64(chunkHash[4], 14) ^ HashOps.RightRotate64(chunkHash[4], 18) ^ HashOps.RightRotate64(chunkHash[4], 41);
+            var s0 = chunkHash[0].RightRotate(28) ^ chunkHash[0].RightRotate(34) ^ chunkHash[0].RightRotate(39);
+            var s1 = chunkHash[4].RightRotate(14) ^ chunkHash[4].RightRotate(18) ^ chunkHash[4].RightRotate(41);
             var ch = chunkHash[4] & chunkHash[5] ^ (~chunkHash[4] & chunkHash[6]);
             var maj = chunkHash[0] & chunkHash[1] ^ (chunkHash[0] & chunkHash[2]) ^ (chunkHash[1] & chunkHash[2]);
             var temp1 = chunkHash[7] + s1 + ch + k[round] + words[round];
@@ -146,9 +144,7 @@ namespace XiPHiA.Cryptography
             var result = new byte[64];
             for (var i = 0; i < 8; i++)
             {
-                var wordBytes = HashOps.ULongToBytes(hash[i]);
-                Array.Reverse(wordBytes);
-                wordBytes.CopyTo(result, 8 * i);
+                hash[i].ToByteArray(true).CopyTo(result, 8 * i);
             }
             return result;
         }
